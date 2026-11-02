@@ -64,4 +64,23 @@ class MainActivity : Activity() {
                         startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
                         return@setOnClickListener
                     }
-                    if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest
+                    if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+                val i = Intent(context, FloatingService::class.java)
+                    .putExtra("mode", if (mode.selectedItemPosition == 0) "browser" else "notes")
+                    .putExtra("url", url.text.toString().ifBlank { "https://www.google.com" })
+                    .putExtra("w", w.text.toString().toIntOrNull() ?: 300)
+                    .putExtra("h", h.text.toString().toIntOrNull() ?: 400)
+                    .putExtra("alpha", (op.progress + 30) / 100f)
+                startForegroundService(i)
+            } catch (t: Throwable) {
+                Toast.makeText(context, "Error: " + t.toString(), Toast.LENGTH_LONG).show()
+            }
+        }
+    })
+    col.addView(Button(this).apply {
+        text = "बंद करें"
+        setOnClickListener { stopService(Intent(context, FloatingService::class.java)) }
+    })
+    setContentView(ScrollView(this).apply { addView(col) })
+}
+}
